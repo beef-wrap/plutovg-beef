@@ -1,0 +1,3 @@
+[submodule "plutovg"]
+	path = plutovg
+	url = git@github.com:sammycage/plutovg.git
