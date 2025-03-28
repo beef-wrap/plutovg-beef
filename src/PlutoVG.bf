@@ -23,10 +23,12 @@
 using System;
 using System.Interop;
 
-namespace PlutoVG_Beef;
+namespace plutovg;
 
-public static class PlutoVG
+public static class plutovg
 {
+	typealias char = c_char;
+	
 	public const float  PLUTOVG_PI      = 3.14159265358979323846f;
 	public const float  PLUTOVG_TWO_PI  = 6.28318530717958647693f;
 	public const float  PLUTOVG_HALF_PI = 1.57079632679489661923f;
@@ -37,13 +39,13 @@ public static class PlutoVG
 	 * @brief Gets the version of the plutovg library.
 	 * @return An integer representing the version of the plutovg library.
 	 */
-	[CLink] public static extern int plutovg_version(void);
+	[CLink] public static extern c_int plutovg_version();
 
 	/**
 	 * @brief Gets the version of the plutovg library as a string.
 	 * @return A string representing the version of the plutovg library.
 	 */
-	[CLink] public static extern c_char* plutovg_version_string(void);
+	[CLink] public static extern char* plutovg_version_string();
 
 	/**
 	 * @brief A function pointer type for a cleanup callback.
@@ -57,7 +59,7 @@ public static class PlutoVG
 	 * @param data A pointer to the data to be written.
 	 * @param size The size of the data in bytes.
 	 */
-	public function void plutovg_write_func_t(void* closure, void* data, int size);
+	public function void plutovg_write_func_t(void* closure, void* data, c_int size);
 
 	/**
 	 * @brief A structure representing a point in 2D space.
@@ -67,7 +69,7 @@ public static class PlutoVG
 	{
 		float x; ///< The x-coordinate of the point.
 		float y; ///< The y-coordinate of the point.
-	};
+	}
 
 	// #define PLUTOVG_MAKE_POINT(x, y) ((plutovg_point_t){x, y})
 
@@ -81,7 +83,7 @@ public static class PlutoVG
 		float y; ///< The y-coordinate of the top-left corner of the rectangle.
 		float w; ///< The width of the rectangle.
 		float h; ///< The height of the rectangle.
-	};
+	}
 
 	// #define PLUTOVG_MAKE_RECT(x, y, w, h) ((plutovg_rect_t){x, y, w, h})
 
@@ -97,7 +99,7 @@ public static class PlutoVG
 		float d; ///< The vertical scaling factor.
 		float e; ///< The horizontal translation offset.
 		float f; ///< The vertical translation offset.
-	};
+	}
 
 	// #define PLUTOVG_MAKE_MATRIX(a, b, c, d, e, f) ((plutovg_matrix_t){a, b, c, d, e, f})
 	
@@ -233,7 +235,7 @@ public static class PlutoVG
 	 * @param dst A pointer to the array of `plutovg_point_t` to store the transformed points.
 	 * @param count The number of points to transform.
 	 */
-	[CLink] public static extern void plutovg_matrix_map_points(plutovg_matrix_t* matrix, plutovg_point_t* src, plutovg_point_t* dst, int count);
+	[CLink] public static extern void plutovg_matrix_map_points(plutovg_matrix_t* matrix, plutovg_point_t* src, plutovg_point_t* dst, c_int count);
 
 	/**
 	 * @brief Transforms the `src` rectangle using `matrix` and stores the result in `dst`.
@@ -253,7 +255,7 @@ public static class PlutoVG
 	 * 
 	 * @return `true` on success, `false` on failure.
 	 */
-	[CLink] public static extern bool plutovg_matrix_parse(plutovg_matrix_t* matrix, c_char* data, int length);
+	[CLink] public static extern bool plutovg_matrix_parse(plutovg_matrix_t* matrix, char* data, c_int length);
 
 	/**
 	 * @brief Represents a 2D path for drawing operations.
@@ -264,7 +266,7 @@ public static class PlutoVG
 	/**
 	 * @brief Enumeration defining path commands.
 	 */
-	public enum plutovg_path_command_t
+	public enum plutovg_path_command_t : c_int
 	{
 		PLUTOVG_PATH_COMMAND_MOVE_TO, ///< Moves the current point to a new position.
 		PLUTOVG_PATH_COMMAND_LINE_TO, ///< Draws a straight line to a new point.
@@ -284,8 +286,8 @@ public static class PlutoVG
 	 *
 	 * @example
 	 *, plutovg_path_element_t* elements;
-	 * int count = plutovg_path_get_elements(path, &elements);
-	 * for(int i = 0; i < count; i += elements[i].header.length) {
+	 * c_int count = plutovg_path_get_elements(path, &elements);
+	 * for(c_int i = 0; i < count; i += elements[i].header.length) {
 	 *     plutovg_path_command_t command = elements[i].header.command;
 	 *     switch(command) {
 	 *     case PLUTOVG_PATH_COMMAND_MOVE_TO:
@@ -312,7 +314,7 @@ public static class PlutoVG
 		struct
 		{
 			plutovg_path_command_t command; ///< The path command.
-			int length; ///< Number of elements including the header.
+			c_int length; ///< Number of elements including the header.
 		} header; ///< Header for path commands.
 		plutovg_point_t point; ///< A coordinate point in the path.
 	}
@@ -324,8 +326,8 @@ public static class PlutoVG
 	public struct plutovg_path_iterator_t
 	{
 		plutovg_path_element_t* elements; ///< Pointer to the array of path elements.
-		int size; ///< Total number of elements in the array.
-		int index; ///< Current position in the array.
+		c_int size; ///< Total number of elements in the array.
+		c_int index; ///< Current position in the array.
 	}
 
 	/**
@@ -358,7 +360,7 @@ public static class PlutoVG
 	 *
 	 * @return A pointer to the newly created path object.
 	 */
-	[CLink] public static extern plutovg_path_t* plutovg_path_create(void);
+	[CLink] public static extern plutovg_path_t* plutovg_path_create();
 
 	/**
 	 * @brief Increases the reference count of a path object.
@@ -385,7 +387,7 @@ public static class PlutoVG
 	 * @param path A pointer to a `plutovg_path_t` object.
 	 * @return The current reference count of the path object.
 	 */
-	[CLink] public static extern int plutovg_path_get_reference_count(plutovg_path_t* path);
+	[CLink] public static extern c_int plutovg_path_get_reference_count(plutovg_path_t* path);
 
 	/**
 	 * @brief Retrieves the elements of a path.
@@ -396,7 +398,7 @@ public static class PlutoVG
 	 * @param elements A pointer to a pointer that will be set to the array of path elements.
 	 * @return The number of elements in the path.
 	 */
-	[CLink] public static extern int plutovg_path_get_elements(plutovg_path_t* path, plutovg_path_element_t** elements);
+	[CLink] public static extern c_int plutovg_path_get_elements(plutovg_path_t* path, plutovg_path_element_t** elements);
 
 	/**
 	 * @brief Moves the current point to a new position.
@@ -505,7 +507,7 @@ public static class PlutoVG
 	 * @param path A pointer to a `plutovg_path_t` object.
 	 * @param count The number of path elements to reserve space for.
 	 */
-	[CLink] public static extern void plutovg_path_reserve(plutovg_path_t* path, int count);
+	[CLink] public static extern void plutovg_path_reserve(plutovg_path_t* path, c_int count);
 
 	/**
 	 * @brief Resets the path.
@@ -618,7 +620,7 @@ public static class PlutoVG
 	 * @param points An array of points associated with the command.
 	 * @param npoints The number of points in the array.
 	 */
-	function void plutovg_path_traverse_func_t(void* closure, plutovg_path_command_t command, plutovg_point_t* points, int npoints);
+	function void plutovg_path_traverse_func_t(void* closure, plutovg_path_command_t command, plutovg_point_t* points, c_int npoints);
 
 	/**
 	 * @brief Traverses the path and calls the callback for each element.
@@ -648,7 +650,7 @@ public static class PlutoVG
 	 * @param traverse_func The callback function to be called for each element of the path.
 	 * @param closure User-defined data passed to the callback.
 	 */
-	[CLink] public static extern void plutovg_path_traverse_dashed(plutovg_path_t* path, float offset, float* dashes, int ndashes, plutovg_path_traverse_func_t traverse_func, void* closure);
+	[CLink] public static extern void plutovg_path_traverse_dashed(plutovg_path_t* path, float offset, float* dashes, c_int ndashes, plutovg_path_traverse_func_t traverse_func, void* closure);
 
 	/**
 	 * @brief Creates a copy of the path.
@@ -675,7 +677,7 @@ public static class PlutoVG
 	 * @param ndashes The number of elements in the `dashes` array.
 	 * @return A pointer to the newly created path clone with dashed pattern.
 	 */
-	[CLink] public static extern plutovg_path_t* plutovg_path_clone_dashed(plutovg_path_t* path, float offset, float* dashes, int ndashes);
+	[CLink] public static extern plutovg_path_t* plutovg_path_clone_dashed(plutovg_path_t* path, float offset, float* dashes, c_int ndashes);
 
 	/**
 	 * @brief Computes the bounding box and total length of the path.
@@ -703,13 +705,12 @@ public static class PlutoVG
 	 * @param length The length of `data`, or `-1` for null-terminated data.
 	 * @return `true` if successful; `false` otherwise.
 	 */
-	[CLink] public static extern bool plutovg_path_parse(plutovg_path_t* path, c_char* data, int length);
+	[CLink] public static extern bool plutovg_path_parse(plutovg_path_t* path, char* data, c_int length);
 
 	/**
 	 * @brief Text encodings used for converting text data to code points.
 	 */
-	[CRepr]
-	public enum plutovg_text_encoding_t
+	public enum plutovg_text_encoding_t : c_int
 	{
 		PLUTOVG_TEXT_ENCODING_UTF8, ///< UTF-8 encoding
 		PLUTOVG_TEXT_ENCODING_UTF16, ///< UTF-16 encoding
@@ -724,9 +725,9 @@ public static class PlutoVG
 	public struct plutovg_text_iterator_t
 	{
 		void* text; ///< Pointer to the text data.
-		int length; ///< Length of the text data.
+		c_int length; ///< Length of the text data.
 		plutovg_text_encoding_t encoding; ///< Encoding format of the text data.
-		int index; ///< Current position in the text data.
+		c_int index; ///< Current position in the text data.
 	}
 
 	/**
@@ -742,7 +743,7 @@ public static class PlutoVG
 	 * @param length Length of the text data, or -1 if the data is null-terminated.
 	 * @param encoding Encoding of the text data.
 	 */
-	[CLink] public static extern void plutovg_text_iterator_init(plutovg_text_iterator_t* it, void* text, int length, plutovg_text_encoding_t encoding);
+	[CLink] public static extern void plutovg_text_iterator_init(plutovg_text_iterator_t* it, void* text, c_int length, plutovg_text_encoding_t encoding);
 
 	/**
 	 * @brief Checks if there are more code points to iterate.
@@ -773,7 +774,7 @@ public static class PlutoVG
 	 * @param ttcindex Index of the font face within a TrueType Collection (TTC).
 	 * @return A pointer to the loaded `plutovg_font_face_t` object, or `NULL` on failure.
 	 */
-	[CLink] public static extern plutovg_font_face_t* plutovg_font_face_load_from_file(c_char* filename, int ttcindex);
+	[CLink] public static extern plutovg_font_face_t* plutovg_font_face_load_from_file(char* filename, c_int ttcindex);
 
 	/**
 	 * @brief Loads a font face from memory.
@@ -785,7 +786,7 @@ public static class PlutoVG
 	 * @param closure User-defined data passed to `destroy_func`.
 	 * @return A pointer to the loaded `plutovg_font_face_t` object, or `NULL` on failure.
 	 */
-	[CLink] public static extern plutovg_font_face_t* plutovg_font_face_load_from_data(void* data, c_uint length, int ttcindex, plutovg_destroy_func_t destroy_func, void* closure);
+	[CLink] public static extern plutovg_font_face_t* plutovg_font_face_load_from_data(void* data, c_uint length, c_int ttcindex, plutovg_destroy_func_t destroy_func, void* closure);
 
 	/**
 	 * @brief Increments the reference count of a font face.
@@ -808,7 +809,7 @@ public static class PlutoVG
 	 * @param face A pointer to a `plutovg_font_face_t` object.
 	 * @return The reference count of the font face.
 	 */
-	[CLink] public static extern int plutovg_font_face_get_reference_count(plutovg_font_face_t* face);
+	[CLink] public static extern c_int plutovg_font_face_get_reference_count(plutovg_font_face_t* face);
 
 	/**
 	 * @brief Retrieves metrics for a font face at a specified size.
@@ -872,7 +873,7 @@ public static class PlutoVG
 	 * @param extents Pointer to a `plutovg_rect_t` object to store the bounding box of the text.
 	 * @return The total advance width of the text.
 	 */
-	[CLink] public static extern float plutovg_font_face_text_extents(plutovg_font_face_t* face, float size, void* text, int length, plutovg_text_encoding_t encoding, plutovg_rect_t* extents);
+	[CLink] public static extern float plutovg_font_face_text_extents(plutovg_font_face_t* face, float size, void* text, c_int length, plutovg_text_encoding_t encoding, plutovg_rect_t* extents);
 
 	/**
 	 * @brief Represents a color with red, green, blue, and alpha components.
@@ -926,7 +927,7 @@ public static class PlutoVG
 	 * @param g Green component (0 to 255).
 	 * @param b Blue component (0 to 255).
 	 */
-	[CLink] public static extern void plutovg_color_init_rgb8(plutovg_color_t* color, int r, int g, int b);
+	[CLink] public static extern void plutovg_color_init_rgb8(plutovg_color_t* color, c_int r, c_int g, c_int b);
 
 	/**
 	 * @brief Initializes a color using RGBA components in the 0-255 range.
@@ -937,7 +938,7 @@ public static class PlutoVG
 	 * @param b Blue component (0 to 255).
 	 * @param a Alpha component (0 to 255).
 	 */
-	[CLink] public static extern void plutovg_color_init_rgba8(plutovg_color_t* color, int r, int g, int b, int a);
+	[CLink] public static extern void plutovg_color_init_rgba8(plutovg_color_t* color, c_int r, c_int g, c_int b, c_int a);
 
 	/**
 	 * @brief Initializes a color from a 32-bit unsigned RGBA value.
@@ -982,7 +983,7 @@ public static class PlutoVG
 	 * 
 	 * @return The number of characters consumed on success (including leading/trailing spaces), or 0 on failure.
 	 */
-	[CLink] public static extern int plutovg_color_parse(plutovg_color_t* color, c_char* data, int length);
+	[CLink] public static extern c_int plutovg_color_parse(plutovg_color_t* color, char* data, c_int length);
 
 	/**
 	 * @brief Represents an image surface for drawing operations.
@@ -1001,7 +1002,7 @@ public static class PlutoVG
 	 * @param height The height of the surface in pixels.
 	 * @return A pointer to the newly created `plutovg_surface_t` object.
 	 */
-	[CLink] public static extern plutovg_surface_t* plutovg_surface_create(int width, int height);
+	[CLink] public static extern plutovg_surface_t* plutovg_surface_create(c_int width, c_int height);
 
 	/**
 	 * @brief Creates an image surface using existing pixel data.
@@ -1012,7 +1013,7 @@ public static class PlutoVG
 	 * @param stride The number of bytes per row in the pixel data.
 	 * @return A pointer to the newly created `plutovg_surface_t` object.
 	 */
-	[CLink] public static extern plutovg_surface_t* plutovg_surface_create_for_data(c_uchar* data, int width, int height, int stride);
+	[CLink] public static extern plutovg_surface_t* plutovg_surface_create_for_data(c_uchar* data, c_int width, c_int height, c_int stride);
 
 	/**
 	 * @brief Loads an image surface from a file.
@@ -1020,7 +1021,7 @@ public static class PlutoVG
 	 * @param filename Path to the image file.
 	 * @return Pointer to the surface, or `NULL` on failure.
 	 */
-	[CLink] public static extern plutovg_surface_t* plutovg_surface_load_from_image_file(c_char* filename);
+	[CLink] public static extern plutovg_surface_t* plutovg_surface_load_from_image_file(char* filename);
 
 	/**
 	 * @brief Loads an image surface from raw image data.
@@ -1029,7 +1030,7 @@ public static class PlutoVG
 	 * @param length Length of the data in bytes.
 	 * @return Pointer to the surface, or `NULL` on failure.
 	 */
-	[CLink] public static extern plutovg_surface_t* plutovg_surface_load_from_image_data(void* data, int length);
+	[CLink] public static extern plutovg_surface_t* plutovg_surface_load_from_image_data(void* data, c_int length);
 
 	/**
 	 * @brief Loads an image surface from base64-encoded data.
@@ -1038,7 +1039,7 @@ public static class PlutoVG
 	 * @param length Length of the data in bytes, or `-1` if null-terminated.
 	 * @return Pointer to the surface, or `NULL` on failure.
 	 */
-	[CLink] public static extern plutovg_surface_t* plutovg_surface_load_from_image_base64(c_char* data, int length);
+	[CLink] public static extern plutovg_surface_t* plutovg_surface_load_from_image_base64(char* data, c_int length);
 
 	/**
 	 * @brief Increments the reference count for a surface.
@@ -1061,7 +1062,7 @@ public static class PlutoVG
 	 * @param surface Pointer to the `plutovg_surface_t` object.
 	 * @return The reference count of the surface.
 	 */
-	[CLink] public static extern int plutovg_surface_get_reference_count(plutovg_surface_t* surface);
+	[CLink] public static extern c_int plutovg_surface_get_reference_count(plutovg_surface_t* surface);
 
 	/**
 	 * @brief Gets the pixel data of the surface.
@@ -1077,7 +1078,7 @@ public static class PlutoVG
 	 * @param surface Pointer to the `plutovg_surface_t` object.
 	 * @return Width of the surface in pixels.
 	 */
-	[CLink] public static extern int plutovg_surface_get_width(plutovg_surface_t* surface);
+	[CLink] public static extern c_int plutovg_surface_get_width(plutovg_surface_t* surface);
 
 	/**
 	 * @brief Gets the height of the surface.
@@ -1085,7 +1086,7 @@ public static class PlutoVG
 	 * @param surface Pointer to the `plutovg_surface_t` object.
 	 * @return Height of the surface in pixels.
 	 */
-	[CLink] public static extern int plutovg_surface_get_height(plutovg_surface_t* surface);
+	[CLink] public static extern c_int plutovg_surface_get_height(plutovg_surface_t* surface);
 
 	/**
 	 * @brief Gets the stride of the surface.
@@ -1093,7 +1094,7 @@ public static class PlutoVG
 	 * @param surface Pointer to the `plutovg_surface_t` object.
 	 * @return Number of bytes per row.
 	 */
-	[CLink] public static extern int plutovg_surface_get_stride(plutovg_surface_t* surface);
+	[CLink] public static extern c_int plutovg_surface_get_stride(plutovg_surface_t* surface);
 
 	/**
 	 * @brief plutovg_surface_clear
@@ -1109,7 +1110,7 @@ public static class PlutoVG
 	 * @param filename Path to the output PNG file.
 	 * @return `true` if successful, `false` otherwise.
 	 */
-	[CLink] public static extern bool plutovg_surface_write_to_png(plutovg_surface_t* surface, c_char* filename);
+	[CLink] public static extern bool plutovg_surface_write_to_png(plutovg_surface_t* surface, char* filename);
 
 	/**
 	 * @brief Writes the surface to a JPEG file.
@@ -1119,7 +1120,7 @@ public static class PlutoVG
 	 * @param quality JPEG quality (0 to 100).
 	 * @return `true` if successful, `false` otherwise.
 	 */
-	[CLink] public static extern bool plutovg_surface_write_to_jpg(plutovg_surface_t* surface, c_char* filename, int quality);
+	[CLink] public static extern bool plutovg_surface_write_to_jpg(plutovg_surface_t* surface, char* filename, c_int quality);
 
 	/**
 	 * @brief Writes the surface to a PNG stream.
@@ -1140,7 +1141,7 @@ public static class PlutoVG
 	 * @param quality JPEG quality (0 to 100).
 	 * @return `true` if successful, `false` otherwise.
 	 */
-	[CLink] public static extern bool plutovg_surface_write_to_jpg_stream(plutovg_surface_t* surface, plutovg_write_func_t write_func, void* closure, int quality);
+	[CLink] public static extern bool plutovg_surface_write_to_jpg_stream(plutovg_surface_t* surface, plutovg_write_func_t write_func, void* closure, c_int quality);
 
 	/**
 	 * @brief Converts pixel data from premultiplied ARGB to RGBA format.
@@ -1154,7 +1155,7 @@ public static class PlutoVG
 	 * @param height Image height in pixels.
 	 * @param stride Number of bytes per image row in the buffers.
 	 */
-	[CLink] public static extern void plutovg_convert_argb_to_rgba(c_uchar* dst, c_uchar* src, int width, int height, int stride);
+	[CLink] public static extern void plutovg_convert_argb_to_rgba(c_uchar* dst, c_uchar* src, c_int width, c_int height, c_int stride);
 
 	/**
 	 * @brief Converts pixel data from RGBA to premultiplied ARGB format.
@@ -1168,12 +1169,12 @@ public static class PlutoVG
 	 * @param height Image height in pixels.
 	 * @param stride Number of bytes per image row in the buffers.
 	 */
-	[CLink] public static extern void plutovg_convert_rgba_to_argb(c_uchar* dst, c_uchar* src, int width, int height, int stride);
+	[CLink] public static extern void plutovg_convert_rgba_to_argb(c_uchar* dst, c_uchar* src, c_int width, c_int height, c_int stride);
 
 	/**
 	 * @brief Defines the type of texture, either plain or tiled.
 	 */
-	public enum plutovg_texture_type_t
+	public enum plutovg_texture_type_t : c_int
 	{
 		PLUTOVG_TEXTURE_TYPE_PLAIN, ///< Plain texture.
 		PLUTOVG_TEXTURE_TYPE_TILED ///< Tiled texture.
@@ -1182,7 +1183,7 @@ public static class PlutoVG
 	/**
 	 * @brief Defines the spread method for gradients.
 	 */
-	public enum plutovg_spread_method_t
+	public enum plutovg_spread_method_t : c_int
 	{
 		PLUTOVG_SPREAD_METHOD_PAD, ///< Pad the gradient's edges.
 		PLUTOVG_SPREAD_METHOD_REFLECT, ///< Reflect the gradient beyond its bounds.
@@ -1246,7 +1247,7 @@ public static class PlutoVG
 	 * @param matrix Optional transformation matrix.
 	 * @return A pointer to the created `plutovg_paint_t` object.
 	 */
-	[CLink] public static extern plutovg_paint_t* plutovg_paint_create_linear_gradient(float x1, float y1, float x2, float y2, plutovg_spread_method_t spread, plutovg_gradient_stop_t* stops, int nstops, plutovg_matrix_t* matrix);
+	[CLink] public static extern plutovg_paint_t* plutovg_paint_create_linear_gradient(float x1, float y1, float x2, float y2, plutovg_spread_method_t spread, plutovg_gradient_stop_t* stops, c_int nstops, plutovg_matrix_t* matrix);
 
 	/**
 	 * @brief Creates a radial gradient paint.
@@ -1263,7 +1264,7 @@ public static class PlutoVG
 	 * @param matrix Optional transformation matrix.
 	 * @return A pointer to the created `plutovg_paint_t` object.
 	 */
-	[CLink] public static extern plutovg_paint_t* plutovg_paint_create_radial_gradient(float cx, float cy, float cr, float fx, float fy, float fr, plutovg_spread_method_t spread, plutovg_gradient_stop_t* stops, int nstops, plutovg_matrix_t* matrix);
+	[CLink] public static extern plutovg_paint_t* plutovg_paint_create_radial_gradient(float cx, float cy, float cr, float fx, float fy, float fr, plutovg_spread_method_t spread, plutovg_gradient_stop_t* stops, c_int nstops, plutovg_matrix_t* matrix);
 
 	/**
 	 * @brief Creates a texture paint from a surface.
@@ -1297,12 +1298,12 @@ public static class PlutoVG
 	 * @param paint A pointer to the `plutovg_paint_t` object.
 	 * @return The reference count of the `plutovg_paint_t` object.
 	 */
-	[CLink] public static extern int plutovg_paint_get_reference_count(plutovg_paint_t* paint);
+	[CLink] public static extern c_int plutovg_paint_get_reference_count(plutovg_paint_t* paint);
 
 	/**
 	 * @brief Defines fill rule types for filling paths.
 	 */
-	public enum plutovg_fill_rule_t
+	public enum plutovg_fill_rule_t : c_int
 	{
 		PLUTOVG_FILL_RULE_NON_ZERO, ///< Non-zero winding fill rule.
 		PLUTOVG_FILL_RULE_EVEN_ODD ///< Even-odd fill rule.
@@ -1311,7 +1312,7 @@ public static class PlutoVG
 	/**
 	 * @brief Defines compositing operations.
 	 */
-	public enum plutovg_operator_t
+	public enum plutovg_operator_t : c_int
 	{
 		PLUTOVG_OPERATOR_CLEAR, ///< Clears the destination (resulting in a fully transparent image).
 		PLUTOVG_OPERATOR_SRC, ///< Source replaces destination.
@@ -1330,7 +1331,7 @@ public static class PlutoVG
 	/**
 	 * @brief Defines the shape used at the ends of open subpaths.
 	 */
-	public enum plutovg_line_cap_t
+	public enum plutovg_line_cap_t : c_int
 	{
 		PLUTOVG_LINE_CAP_BUTT, ///< Flat edge at the end of the stroke.
 		PLUTOVG_LINE_CAP_ROUND, ///< Rounded ends at the end of the stroke.
@@ -1340,7 +1341,7 @@ public static class PlutoVG
 	/**
 	 * @brief Defines the shape used at the corners of paths.
 	 */
-	public enum plutovg_line_join_t
+	public enum plutovg_line_join_t : c_int
 	{
 		PLUTOVG_LINE_JOIN_MITER, ///< Miter join with sharp corners.
 		PLUTOVG_LINE_JOIN_ROUND, ///< Rounded join.
@@ -1382,7 +1383,7 @@ public static class PlutoVG
 	 * @param canvas A pointer to a `plutovg_canvas_t` object.
 	 * @return The current reference count.
 	 */
-	[CLink] public static extern int plutovg_canvas_get_reference_count(plutovg_canvas_t* canvas);
+	[CLink] public static extern c_int plutovg_canvas_get_reference_count(plutovg_canvas_t* canvas);
 
 	/**
 	 * @brief Gets the surface associated with the canvas.
@@ -1448,7 +1449,7 @@ public static class PlutoVG
 	 * @param nstops Number of gradient stops.
 	 * @param matrix Optional transformation matrix.
 	 */
-	[CLink] public static extern void plutovg_canvas_set_linear_gradient(plutovg_canvas_t* canvas, float x1, float y1, float x2, float y2, plutovg_spread_method_t spread, plutovg_gradient_stop_t* stops, int nstops, plutovg_matrix_t* matrix);
+	[CLink] public static extern void plutovg_canvas_set_linear_gradient(plutovg_canvas_t* canvas, float x1, float y1, float x2, float y2, plutovg_spread_method_t spread, plutovg_gradient_stop_t* stops, c_int nstops, plutovg_matrix_t* matrix);
 
 	/**
 	 * @brief Sets the current paint to a radial gradient.
@@ -1465,7 +1466,7 @@ public static class PlutoVG
 	 * @param nstops Number of gradient stops.
 	 * @param matrix Optional transformation matrix.
 	 */
-	[CLink] public static extern void plutovg_canvas_set_radial_gradient(plutovg_canvas_t* canvas, float cx, float cy, float cr, float fx, float fy, float fr, plutovg_spread_method_t spread, plutovg_gradient_stop_t* stops, int nstops, plutovg_matrix_t* matrix);
+	[CLink] public static extern void plutovg_canvas_set_radial_gradient(plutovg_canvas_t* canvas, float cx, float cy, float cr, float fx, float fy, float fr, plutovg_spread_method_t spread, plutovg_gradient_stop_t* stops, c_int nstops, plutovg_matrix_t* matrix);
 
 	/**
 	 * @brief Sets the current paint to a texture.
@@ -1641,7 +1642,7 @@ public static class PlutoVG
 	 * @param dashes Array of dash lengths.
 	 * @param ndashes Number of dash lengths.
 	 */
-	[CLink] public static extern void plutovg_canvas_set_dash(plutovg_canvas_t* canvas, float offset, float* dashes, int ndashes);
+	[CLink] public static extern void plutovg_canvas_set_dash(plutovg_canvas_t* canvas, float offset, float* dashes, c_int ndashes);
 
 	/**
 	 * @brief Sets the dash offset.
@@ -1663,7 +1664,7 @@ public static class PlutoVG
 	 * @param dashes Array of dash lengths.
 	 * @param ndashes Number of dash lengths.
 	 */
-	[CLink] public static extern void plutovg_canvas_set_dash_array(plutovg_canvas_t* canvas, float* dashes, int ndashes);
+	[CLink] public static extern void plutovg_canvas_set_dash_array(plutovg_canvas_t* canvas, float* dashes, c_int ndashes);
 
 	/**
 	 * @brief Retrieves the current dash pattern.
@@ -1671,7 +1672,7 @@ public static class PlutoVG
 	 * @param dashes Pointer to store the dash array.
 	 * @return The number of dash lengths.
 	 */
-	[CLink] public static extern int plutovg_canvas_get_dash_array(plutovg_canvas_t* canvas, float** dashes);
+	[CLink] public static extern c_int plutovg_canvas_get_dash_array(plutovg_canvas_t* canvas, float** dashes);
 
 	/**
 	 * @brief Translates the current transformation matrix by offsets `tx` and `ty`.
@@ -2123,7 +2124,7 @@ public static class PlutoVG
 	 * @param y The y-coordinate of the origin.
 	 * @return The total advance width of the text.
 	 */
-	[CLink] public static extern float plutovg_canvas_add_text(plutovg_canvas_t* canvas, void* text, int length, plutovg_text_encoding_t encoding, float x, float y);
+	[CLink] public static extern float plutovg_canvas_add_text(plutovg_canvas_t* canvas, void* text, c_int length, plutovg_text_encoding_t encoding, float x, float y);
 
 	/**
 	 * @brief Fills a text at the specified origin.
@@ -2137,7 +2138,7 @@ public static class PlutoVG
 	 * @param y The y-coordinate of the origin.
 	 * @return The total advance width of the text.
 	 */
-	[CLink] public static extern float plutovg_canvas_fill_text(plutovg_canvas_t* canvas, void* text, int length, plutovg_text_encoding_t encoding, float x, float y);
+	[CLink] public static extern float plutovg_canvas_fill_text(plutovg_canvas_t* canvas, void* text, c_int length, plutovg_text_encoding_t encoding, float x, float y);
 
 	/**
 	 * @brief Strokes a text at the specified origin.
@@ -2151,7 +2152,7 @@ public static class PlutoVG
 	 * @param y The y-coordinate of the origin.
 	 * @return The total advance width of the text.
 	 */
-	[CLink] public static extern float plutovg_canvas_stroke_text(plutovg_canvas_t* canvas, void* text, int length, plutovg_text_encoding_t encoding, float x, float y);
+	[CLink] public static extern float plutovg_canvas_stroke_text(plutovg_canvas_t* canvas, void* text, c_int length, plutovg_text_encoding_t encoding, float x, float y);
 
 	/**
 	 * @brief Intersects the current clipping region with text at the specified origin.
@@ -2165,7 +2166,7 @@ public static class PlutoVG
 	 * @param y The y-coordinate of the origin.
 	 * @return The total advance width of the text.
 	 */
-	[CLink] public static extern float plutovg_canvas_clip_text(plutovg_canvas_t* canvas, void* text, int length, plutovg_text_encoding_t encoding, float x, float y);
+	[CLink] public static extern float plutovg_canvas_clip_text(plutovg_canvas_t* canvas, void* text, c_int length, plutovg_text_encoding_t encoding, float x, float y);
 
 	/**
 	 * @brief Retrieves font metrics for the current font.
@@ -2199,5 +2200,5 @@ public static class PlutoVG
 	 * @param extents The bounding box of the text.
 	 * @return The total advance width of the text.
 	 */
-	[CLink] public static extern float plutovg_canvas_text_extents(plutovg_canvas_t* canvas, void* text, int length, plutovg_text_encoding_t encoding, plutovg_rect_t* extents);
+	[CLink] public static extern float plutovg_canvas_text_extents(plutovg_canvas_t* canvas, void* text, c_int length, plutovg_text_encoding_t encoding, plutovg_rect_t* extents);
 }

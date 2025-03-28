@@ -1,5 +1,5 @@
 using System;
-using static PlutoVG_Beef.PlutoVG;
+using static plutovg.plutovg;
 
 namespace example;
 
